@@ -1,0 +1,863 @@
+import { useState, useEffect } from “react”;
+
+/* ─── DATA ─────────────────────────────────────────────────────────── */
+
+const CITIES = [
+{ id: “mpls”,     name: “Minneapolis”, sub: “MN · Home Market”,    x: 42, y: 40, pop: 107000, users: 847, isHome: true  },
+{ id: “seattle”,  name: “Seattle”,     sub: “WA”,                  x: 9,  y: 30, pop: 30000,  users: 89,  isHome: false },
+{ id: “columbus”, name: “Columbus”,    sub: “OH”,                  x: 63, y: 42, pop: 45000,  users: 124, isHome: false },
+{ id: “toronto”,  name: “Toronto”,     sub: “ON · Canada”,         x: 69, y: 28, pop: 50000,  users: 67,  isHome: false },
+{ id: “ottawa”,   name: “Ottawa”,      sub: “ON · Canada”,         x: 75, y: 20, pop: 20000,  users: 31,  isHome: false },
+{ id: “nashville”,name: “Nashville”,   sub: “TN”,                  x: 57, y: 55, pop: 15000,  users: 42,  isHome: false },
+{ id: “atlanta”,  name: “Atlanta”,     sub: “GA”,                  x: 60, y: 65, pop: 12000,  users: 38,  isHome: false },
+];
+
+// Intra-city boards per city
+const CITY_BOARDS = {
+mpls: [
+{
+id: “b1”, type: “Employment”, title: “Amazon DSP Hiring — No CDL Needed”,
+body: “They’re hiring package delivery drivers. Paid training, starts $21/hr. DM me for the referral link — I got hired through this 3 months ago.”,
+author: “User in North Mpls”, replies: 14, upvotes: 38, time: “2h ago”, saved: false,
+tag: “Job Lead”,
+},
+{
+id: “b2”, type: “Resume”, title: “Resume Review Thread — April 2026”,
+body: “Drop your resume in the comments. I’ll give feedback on formatting and ATS keywords. I work in HR. Helped 6 people get callbacks last month.”,
+author: “User in Brooklyn Park”, replies: 22, upvotes: 61, time: “5h ago”, saved: false,
+tag: “Resume Help”,
+},
+{
+id: “b3”, type: “Network”, title: “Somali Contractors Directory — Twin Cities”,
+body: “Building a vetted list of Somali-owned contractors: electricians, plumbers, HVAC, painters. Add your info or tag someone trustworthy. Let’s build wealth inside the community first.”,
+author: “User in Burnsville”, replies: 31, upvotes: 94, time: “1d ago”, saved: false,
+tag: “Networking”,
+},
+{
+id: “b4”, type: “Employment”, title: “Hennepin County Case Manager Openings”,
+body: “They’re posting 12 positions next week. I work there — salary range $52K–$68K. Requires bachelor’s. Happy to answer questions about the culture and interview process.”,
+author: “User in Eden Prairie”, replies: 9, upvotes: 45, time: “6h ago”, saved: false,
+tag: “Job Lead”,
+},
+{
+id: “b5”, type: “Resume”, title: “LinkedIn Profile Clinic — Free”,
+body: “Running a free 45-min Zoom session on optimizing your LinkedIn for healthcare and government roles. This Saturday 10am. Drop your email to register.”,
+author: “User in Richfield”, replies: 17, upvotes: 52, time: “3d ago”, saved: false,
+tag: “Workshop”,
+},
+],
+columbus: [
+{
+id: “c1”, type: “Employment”, title: “Warehouse Hiring — Franklin County”,
+body: “FedEx ground is hiring in Etna. 3rd shift, $19.50/hr + benefits after 90 days. No experience needed. Application link in comments.”,
+author: “User in Columbus”, replies: 8, upvotes: 27, time: “4h ago”, saved: false,
+tag: “Job Lead”,
+},
+{
+id: “c2”, type: “Network”, title: “Columbus Somali Business Owners — Monthly Meetup”,
+body: “First Thursday of every month at Masjid Ibn Taymiyyah. Bring business cards. We’ve connected 4 suppliers and 2 commercial tenants this year.”,
+author: “User in Columbus”, replies: 5, upvotes: 33, time: “2d ago”, saved: false,
+tag: “Networking”,
+},
+],
+seattle: [
+{
+id: “s1”, type: “Employment”, title: “King County Jobs — Language Access Roles”,
+body: “King County is hiring Somali-speaking community health workers. $24/hr. This is exactly the kind of work that pays well and gives back. Posting closes April 30.”,
+author: “User in Tukwila”, replies: 11, upvotes: 44, time: “1d ago”, saved: false,
+tag: “Job Lead”,
+},
+{
+id: “s2”, type: “Resume”, title: “Resume → Interview Prep — Healthcare Track”,
+body: “I’ve been in healthcare recruiting for 5 years. If you’re trying to break into nursing assistant, MA, or admin roles — drop your current resume here. I’ll give real feedback.”,
+author: “User in SeaTac”, replies: 19, upvotes: 58, time: “3d ago”, saved: false,
+tag: “Resume Help”,
+},
+],
+toronto: [
+{
+id: “t1”, type: “Employment”, title: “TTC Hiring — Bus Operators”,
+body: “Toronto Transit Commission is actively recruiting. Full benefits, pension, union job. $30+/hr. They fast-track applicants with clean driving records. Info session April 18.”,
+author: “User in Scarborough”, replies: 13, upvotes: 49, time: “8h ago”, saved: false,
+tag: “Job Lead”,
+},
+],
+ottawa: [],
+nashville: [
+{
+id: “n1”, type: “Network”, title: “Nashville Somali Entrepreneurs — Informal Group”,
+body: “We meet biweekly at a coffee shop near Nolensville Road. No agenda, just building trust and sharing leads. 12 regulars. All backgrounds welcome.”,
+author: “User in Nashville”, replies: 4, upvotes: 21, time: “5d ago”, saved: false,
+tag: “Networking”,
+},
+],
+atlanta: [],
+};
+
+// Cross-city interactions
+const CROSS_LINKS = [
+{ id: 1,  from: “mpls”,     to: “seattle”,   category: “Employment”, desc: “Job referral shared”,           time: “2m ago”  },
+{ id: 2,  from: “mpls”,     to: “columbus”,  category: “Legal Aid”,  desc: “Legal aid guide forwarded”,    time: “7m ago”  },
+{ id: 3,  from: “columbus”, to: “toronto”,   category: “Housing”,    desc: “Housing thread cross-shared”,  time: “12m ago” },
+{ id: 4,  from: “mpls”,     to: “toronto”,   category: “Healthcare”, desc: “Healthcare enrollment help”,   time: “18m ago” },
+{ id: 5,  from: “seattle”,  to: “mpls”,      category: “Employment”, desc: “Resume template shared back”,  time: “24m ago” },
+{ id: 6,  from: “mpls”,     to: “nashville”, category: “Community”,  desc: “Community resource shared”,   time: “31m ago” },
+{ id: 7,  from: “toronto”,  to: “ottawa”,    category: “Legal Aid”,  desc: “Immigration Q&A answered”,    time: “45m ago” },
+{ id: 8,  from: “atlanta”,  to: “mpls”,      category: “Healthcare”, desc: “Clinic referral requested”,    time: “1h ago”  },
+{ id: 9,  from: “mpls”,     to: “atlanta”,   category: “Employment”, desc: “Workforce program exported”,   time: “1h ago”  },
+{ id: 10, from: “columbus”, to: “mpls”,      category: “Housing”,    desc: “Rental assistance thread”,    time: “2h ago”  },
+];
+
+const CAT_COLOR = {
+Employment: “#2ABBA8”,
+“Legal Aid”: “#D4A843”,
+Housing:    “#C07BE0”,
+Healthcare: “#E07B7B”,
+Community:  “#7EB8A0”,
+Resume:     “#D4A843”,
+Network:    “#2ABBA8”,
+};
+
+const BOARD_TAG_COLOR = {
+“Job Lead”:    “#2ABBA8”,
+“Resume Help”: “#D4A843”,
+“Networking”:  “#C07BE0”,
+“Workshop”:    “#E07B7B”,
+};
+
+const cityMap = Object.fromEntries(CITIES.map(c => [c.id, c]));
+
+function curvePath(x1, y1, x2, y2) {
+const mx = (x1+x2)/2, my = (y1+y2)/2;
+const dx = x2-x1, dy = y2-y1, len = Math.sqrt(dx*dx+dy*dy);
+const offset = Math.min(len*0.18, 5);
+return `M ${x1} ${y1} Q ${mx-(dy/len)*offset} ${my+(dx/len)*offset} ${x2} ${y2}`;
+}
+
+/* ─── BOARD CARD ─────────────────────────────────────────────────────── */
+function BoardCard({ post, accent }) {
+const [saved, setSaved] = useState(false);
+const [upvoted, setUpvoted] = useState(false);
+const [votes, setVotes] = useState(post.upvotes);
+const tagColor = BOARD_TAG_COLOR[post.tag] || “#D4A843”;
+
+return (
+<div style={{
+border: “1px solid rgba(255,255,255,0.06)”,
+borderRadius: “1px”,
+padding: “18px 20px”,
+background: “rgba(255,255,255,0.015)”,
+marginBottom: “10px”,
+transition: “border-color 0.2s”,
+}}
+onMouseEnter={e => e.currentTarget.style.borderColor = `${accent}40`}
+onMouseLeave={e => e.currentTarget.style.borderColor = “rgba(255,255,255,0.06)”}
+>
+{/* Tag + time */}
+<div style={{ display: “flex”, justifyContent: “space-between”, alignItems: “center”, marginBottom: “10px” }}>
+<span style={{
+fontFamily: “‘Barlow Condensed’, sans-serif”,
+fontSize: “9px”, letterSpacing: “0.18em”, textTransform: “uppercase”,
+color: tagColor, fontWeight: 600,
+padding: “2px 8px”,
+border: `1px solid ${tagColor}33`,
+background: `${tagColor}10`,
+}}>
+{post.tag}
+</span>
+<span style={{ fontFamily: “monospace”, fontSize: “10px”, color: “rgba(255,255,255,0.18)” }}>
+{post.time}
+</span>
+</div>
+
+```
+  {/* Title */}
+  <div style={{
+    fontFamily: "'Cormorant Garamond', Georgia, serif",
+    fontSize: "17px", fontWeight: 600,
+    color: "#F2EDE4", lineHeight: 1.25, marginBottom: "8px",
+  }}>
+    {post.title}
+  </div>
+
+  {/* Body */}
+  <div style={{
+    fontSize: "12.5px", color: "rgba(242,237,228,0.52)",
+    lineHeight: 1.65, marginBottom: "14px", fontWeight: 300,
+  }}>
+    {post.body}
+  </div>
+
+  {/* Footer */}
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <span style={{
+      fontFamily: "'Barlow Condensed', sans-serif",
+      fontSize: "10px", color: "rgba(255,255,255,0.22)", letterSpacing: "0.04em",
+    }}>
+      {post.author}
+    </span>
+    <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+      {/* Replies */}
+      <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.22)" }}>💬</span>
+        <span style={{ fontFamily: "monospace", fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
+          {post.replies}
+        </span>
+      </div>
+      {/* Upvote */}
+      <button
+        onClick={() => { setUpvoted(u => !u); setVotes(v => upvoted ? v - 1 : v + 1); }}
+        style={{
+          display: "flex", gap: "5px", alignItems: "center",
+          background: "none", border: "none", cursor: "pointer",
+          padding: 0,
+        }}
+      >
+        <span style={{ fontSize: "12px", filter: upvoted ? "none" : "grayscale(1)", transition: "filter 0.15s" }}>▲</span>
+        <span style={{
+          fontFamily: "monospace", fontSize: "11px",
+          color: upvoted ? accent : "rgba(255,255,255,0.3)",
+          transition: "color 0.15s",
+        }}>
+          {votes}
+        </span>
+      </button>
+      {/* Save */}
+      <button
+        onClick={() => setSaved(s => !s)}
+        style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase",
+          color: saved ? accent : "rgba(255,255,255,0.2)",
+          transition: "color 0.15s", padding: 0,
+        }}
+      >
+        {saved ? "✓ Saved" : "Save"}
+      </button>
+    </div>
+  </div>
+</div>
+```
+
+);
+}
+
+/* ─── CITY DETAIL PANEL ──────────────────────────────────────────────── */
+function CityPanel({ city, onClose }) {
+const [tab, setTab] = useState(“all”);
+const boards = CITY_BOARDS[city.id] || [];
+const accent = city.isHome ? “#D4A843” : “#2ABBA8”;
+
+const types = [“all”, “Employment”, “Resume”, “Network”];
+const filtered = tab === “all” ? boards : boards.filter(b => b.type === tab);
+
+const crossOut = CROSS_LINKS.filter(l => l.from === city.id);
+const crossIn  = CROSS_LINKS.filter(l => l.to   === city.id);
+
+return (
+<div style={{
+position: “absolute”, inset: 0, zIndex: 50,
+background: “#0a080a”,
+display: “flex”, flexDirection: “column”,
+}}>
+<style>{`@keyframes slide-up { from { opacity: 0; transform: translateY(16px); } to   { opacity: 1; transform: translateY(0); } } .panel-enter { animation: slide-up 0.28s ease; }`}</style>
+
+```
+  {/* Panel header */}
+  <div style={{
+    padding: "20px 28px 16px",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    background: "#0c0a0c",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    flexShrink: 0,
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <button onClick={onClose} style={{
+        background: "none", border: "1px solid rgba(255,255,255,0.08)",
+        color: "rgba(255,255,255,0.3)", cursor: "pointer",
+        padding: "5px 12px", fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase",
+        borderRadius: "1px",
+      }}>
+        ← Map
+      </button>
+      <div>
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.18)", marginBottom: "2px",
+        }}>
+          City Board
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+          <span style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "26px", fontWeight: 600, color: accent, lineHeight: 1,
+          }}>
+            {city.name}
+          </span>
+          <span style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "11px", color: "rgba(255,255,255,0.25)",
+          }}>
+            {city.sub}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {/* City stats */}
+    <div style={{ display: "flex", gap: "32px" }}>
+      {[
+        { val: city.users.toLocaleString(), label: "Registered Users" },
+        { val: boards.length,               label: "Active Posts"     },
+        { val: crossOut.length + crossIn.length, label: "Cross-City Links" },
+        { val: `${Math.round((city.users / city.pop) * 100)}%`, label: "Community Reach" },
+      ].map((s, i) => (
+        <div key={i} style={{ textAlign: "right" }}>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "28px", fontWeight: 700, color: accent, lineHeight: 1,
+          }}>
+            {s.val}
+          </div>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "rgba(255,255,255,0.2)", marginTop: "2px",
+          }}>
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Tab bar */}
+  <div style={{
+    display: "flex", gap: "0",
+    borderBottom: "1px solid rgba(255,255,255,0.05)",
+    background: "#0b090b", flexShrink: 0,
+  }}>
+    {types.map(t => (
+      <button key={t} onClick={() => setTab(t)} style={{
+        padding: "13px 24px",
+        background: "none", border: "none", borderBottom: `2px solid ${tab === t ? accent : "transparent"}`,
+        cursor: "pointer",
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase",
+        color: tab === t ? accent : "rgba(255,255,255,0.25)",
+        transition: "all 0.15s",
+      }}>
+        {t === "all" ? "All Posts" : t}
+      </button>
+    ))}
+    <div style={{ flex: 1 }} />
+    <button style={{
+      padding: "13px 22px",
+      background: `${accent}18`, border: "none", borderBottom: "2px solid transparent",
+      cursor: "pointer",
+      fontFamily: "'Barlow Condensed', sans-serif",
+      fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase",
+      color: accent,
+    }}>
+      + Post to Board
+    </button>
+  </div>
+
+  {/* Body: posts + cross-city sidebar */}
+  <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+
+    {/* Posts column */}
+    <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}
+         className="panel-enter">
+      {filtered.length === 0 ? (
+        <div style={{
+          padding: "60px 0", textAlign: "center",
+          color: "rgba(255,255,255,0.18)", fontSize: "14px",
+          fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif",
+        }}>
+          No posts yet — be the first to contribute.
+        </div>
+      ) : (
+        filtered.map(post => (
+          <BoardCard key={post.id} post={post} accent={accent} />
+        ))
+      )}
+    </div>
+
+    {/* Cross-city sidebar */}
+    <div style={{
+      width: "260px",
+      borderLeft: "1px solid rgba(255,255,255,0.05)",
+      padding: "20px 18px",
+      overflowY: "auto",
+      flexShrink: 0,
+      background: "#0c0a0c",
+    }}>
+      <div style={{
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase",
+        color: "rgba(255,255,255,0.2)", marginBottom: "18px",
+      }}>
+        Cross-City Activity
+      </div>
+
+      {crossOut.length > 0 && (
+        <>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "#2ABBA8", marginBottom: "10px",
+          }}>
+            Exported from here →
+          </div>
+          {crossOut.map(l => (
+            <div key={l.id} style={{
+              borderLeft: `2px solid ${CAT_COLOR[l.category] || "#D4A843"}`,
+              paddingLeft: "10px", marginBottom: "12px",
+            }}>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: "10px", letterSpacing: "0.08em",
+                color: CAT_COLOR[l.category] || "#D4A843", marginBottom: "2px",
+                textTransform: "uppercase",
+              }}>
+                → {cityMap[l.to]?.name}
+              </div>
+              <div style={{ fontSize: "11.5px", color: "rgba(242,237,228,0.5)", lineHeight: 1.4 }}>
+                {l.desc}
+              </div>
+              <div style={{ fontFamily: "monospace", fontSize: "9px", color: "rgba(255,255,255,0.18)", marginTop: "3px" }}>
+                {l.time}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {crossIn.length > 0 && (
+        <>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "#C07BE0", marginBottom: "10px",
+            marginTop: crossOut.length > 0 ? "20px" : 0,
+          }}>
+            ← Received here
+          </div>
+          {crossIn.map(l => (
+            <div key={l.id} style={{
+              borderLeft: `2px solid ${CAT_COLOR[l.category] || "#D4A843"}`,
+              paddingLeft: "10px", marginBottom: "12px",
+            }}>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: "10px", letterSpacing: "0.08em",
+                color: CAT_COLOR[l.category] || "#D4A843", marginBottom: "2px",
+                textTransform: "uppercase",
+              }}>
+                ← {cityMap[l.from]?.name}
+              </div>
+              <div style={{ fontSize: "11.5px", color: "rgba(242,237,228,0.5)", lineHeight: 1.4 }}>
+                {l.desc}
+              </div>
+              <div style={{ fontFamily: "monospace", fontSize: "9px", color: "rgba(255,255,255,0.18)", marginTop: "3px" }}>
+                {l.time}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {crossOut.length === 0 && crossIn.length === 0 && (
+        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.18)", fontStyle: "italic", lineHeight: 1.6 }}>
+          No cross-city activity yet. Posts shared from the local board will appear here.
+        </div>
+      )}
+
+      {/* Insight callout */}
+      {(crossOut.length + crossIn.length) > 2 && (
+        <div style={{
+          marginTop: "24px",
+          padding: "14px",
+          background: "rgba(212,168,67,0.06)",
+          border: "1px solid rgba(212,168,67,0.12)",
+        }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase",
+            color: "#D4A843", marginBottom: "7px",
+          }}>
+            Insight
+          </div>
+          <div style={{ fontSize: "12px", color: "rgba(242,237,228,0.45)", lineHeight: 1.6 }}>
+            {city.name} content reaches {crossOut.length} other cities — making it a network hub, not just a local board.
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+```
+
+);
+}
+
+/* ─── MAIN MAP ───────────────────────────────────────────────────────── */
+export default function DiasporaMap() {
+const [activeCity, setActiveCity] = useState(null);
+const [panelCity, setPanelCity]   = useState(null);
+const [hovered, setHovered]       = useState(null);
+const [filter, setFilter]         = useState(“All”);
+const [tick, setTick]             = useState(0);
+
+useEffect(() => {
+const t = setInterval(() => setTick(n => n + 1), 3000);
+return () => clearInterval(t);
+}, []);
+
+const filteredLinks = filter === “All”
+? CROSS_LINKS
+: CROSS_LINKS.filter(l => l.category === filter);
+
+const visibleLinks = activeCity
+? filteredLinks.filter(l => l.from === activeCity || l.to === activeCity)
+: filteredLinks;
+
+if (panelCity) {
+return <CityPanel city={panelCity} onClose={() => setPanelCity(null)} />;
+}
+
+return (
+<div style={{
+background: “#080608”, minHeight: “100vh”,
+color: “#F2EDE4”,
+fontFamily: “‘Barlow’, ‘DM Sans’, system-ui, sans-serif”,
+display: “flex”, flexDirection: “column”,
+}}>
+<style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,300;1,600&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500&display=swap'); @keyframes dash { to { stroke-dashoffset: -24; } } @keyframes glow-home { 0%,100% { filter: drop-shadow(0 0 2px #D4A84360); } 50% { filter: drop-shadow(0 0 7px #D4A843a0); } } @keyframes node-pulse { 0% { r: 0; opacity: 0.4; } 100% { r: 4; opacity: 0; } } .home-node { animation: glow-home 3s ease-in-out infinite; } ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.15); }`}</style>
+
+```
+  {/* ── HEADER ── */}
+  <div style={{
+    padding: "14px 28px",
+    borderBottom: "1px solid rgba(212,168,67,0.08)",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    background: "rgba(8,6,8,0.96)", backdropFilter: "blur(12px)",
+    flexShrink: 0,
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "20px", color: "#D4A843", fontWeight: 600 }}>
+        Caawi
+      </span>
+      <span style={{ width: "1px", height: "16px", background: "rgba(255,255,255,0.08)", display: "inline-block" }} />
+      <span style={{
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
+        color: "rgba(255,255,255,0.2)",
+      }}>
+        Diaspora Network Map
+      </span>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2ABBA8", boxShadow: "0 0 6px #2ABBA8aa" }} />
+        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#2ABBA8" }}>
+          Live
+        </span>
+      </span>
+    </div>
+    <div style={{ display: "flex", gap: "32px" }}>
+      {[
+        { val: "1,338",  label: "Total Users"       },
+        { val: "7",      label: "Active Cities"     },
+        { val: CROSS_LINKS.length, label: "Cross-City Links" },
+        { val: Object.values(CITY_BOARDS).flat().length, label: "Board Posts" },
+      ].map((s, i) => (
+        <div key={i} style={{ textAlign: "right" }}>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px", fontWeight: 700, color: "#D4A843", lineHeight: 1 }}>
+            {s.val}
+          </div>
+          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginTop: "2px" }}>
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* ── BODY ── */}
+  <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+
+    {/* MAP */}
+    <div style={{ flex: 1, position: "relative" }}>
+      {/* Filter bar */}
+      <div style={{ position: "absolute", top: "14px", left: "14px", zIndex: 20, display: "flex", gap: "5px" }}>
+        {["All", "Employment", "Legal Aid", "Housing", "Healthcare", "Community"].map(cat => {
+          const color = CAT_COLOR[cat] || "#D4A843";
+          const isA = filter === cat;
+          return (
+            <button key={cat} onClick={() => setFilter(cat)} style={{
+              padding: "4px 12px",
+              border: `1px solid ${isA ? color : "rgba(255,255,255,0.07)"}`,
+              borderRadius: "1px",
+              background: isA ? `${color}14` : "rgba(8,6,8,0.85)",
+              color: isA ? color : "rgba(255,255,255,0.28)",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase",
+              cursor: "pointer", transition: "all 0.15s", fontWeight: 600,
+            }}>
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Click-city hint */}
+      <div style={{
+        position: "absolute", bottom: "14px", left: "14px", zIndex: 20,
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase",
+        color: "rgba(255,255,255,0.15)",
+      }}>
+        Click a city to filter connections · Double-click to open city board
+      </div>
+
+      <svg viewBox="0 0 100 78" style={{ width: "100%", height: "100%", minHeight: "500px", display: "block" }}
+           preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="grid" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="0.16" fill="rgba(212,168,67,0.10)" />
+          </pattern>
+          <radialGradient id="homeGlow" cx="42%" cy="40%" r="22%">
+            <stop offset="0%"   stopColor="#D4A843" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#D4A843" stopOpacity="0" />
+          </radialGradient>
+          <filter id="blur-soft">
+            <feGaussianBlur stdDeviation="0.5" />
+          </filter>
+        </defs>
+        <rect width="100" height="78" fill="#080608" />
+        <rect width="100" height="78" fill="url(#grid)" />
+        <rect width="100" height="78" fill="url(#homeGlow)" />
+
+        {/* Arcs */}
+        {visibleLinks.map((link, i) => {
+          const f = cityMap[link.from], t = cityMap[link.to];
+          if (!f || !t) return null;
+          const col = CAT_COLOR[link.category] || "#D4A843";
+          const isHov = hovered === link.id;
+          const speed = 1.2 + (link.id % 5) * 0.3;
+          const path = curvePath(f.x, f.y, t.x, t.y);
+          return (
+            <g key={link.id}
+               onMouseEnter={() => setHovered(link.id)}
+               onMouseLeave={() => setHovered(null)}>
+              <path d={path} fill="none" stroke={col}
+                strokeWidth={isHov ? "0.9" : "0.4"} strokeOpacity={isHov ? 0.2 : 0.08} />
+              <path d={path} fill="none" stroke={col}
+                strokeWidth={isHov ? "0.35" : "0.18"} strokeOpacity={isHov ? 1 : 0.55}
+                strokeDasharray="2.2 3.8"
+                style={{ animation: `dash ${speed}s linear infinite` }} />
+            </g>
+          );
+        })}
+
+        {/* Nodes */}
+        {CITIES.map(city => {
+          const isActive = activeCity === city.id;
+          const hasConn = visibleLinks.some(l => l.from === city.id || l.to === city.id);
+          const dimmed = activeCity && !hasConn && !isActive;
+          const r = city.isHome ? 1.6 : Math.max(0.7, Math.min(1.2, city.users / 160));
+          const col = city.isHome ? "#D4A843" : isActive ? "#D4A843" : "#2ABBA8";
+          const hasBoard = (CITY_BOARDS[city.id] || []).length > 0;
+
+          return (
+            <g key={city.id}
+               style={{ opacity: dimmed ? 0.25 : 1, transition: "opacity 0.2s", cursor: "pointer" }}
+               className={city.isHome ? "home-node" : ""}
+               onClick={() => setActiveCity(isActive ? null : city.id)}
+               onDoubleClick={() => setPanelCity(city)}
+            >
+              {/* Rings */}
+              <circle cx={city.x} cy={city.y} r={r + 1.8} fill="none"
+                stroke={col} strokeWidth="0.1" strokeOpacity={isActive || city.isHome ? 0.3 : 0.06} />
+              <circle cx={city.x} cy={city.y} r={r + 0.8} fill="none"
+                stroke={col} strokeWidth="0.1" strokeOpacity={isActive || city.isHome ? 0.18 : 0.04} />
+              {/* Node */}
+              <circle cx={city.x} cy={city.y} r={r}
+                fill={isActive || city.isHome ? `${col}22` : `${col}0e`}
+                stroke={col} strokeWidth="0.22" />
+              {/* Core */}
+              <circle cx={city.x} cy={city.y} r={r * 0.38}
+                fill={col} fillOpacity={isActive || city.isHome ? 1 : 0.75} />
+              {/* Board indicator dot */}
+              {hasBoard && (
+                <circle cx={city.x + r * 0.88} cy={city.y - r * 0.88} r="0.38"
+                  fill="#D4A843" fillOpacity="0.9" />
+              )}
+              {/* City name */}
+              <text x={city.x} y={city.y - r - 1.1} textAnchor="middle" style={{
+                fontSize: city.isHome ? "1.8px" : "1.45px",
+                fill: isActive ? "#D4A843" : city.isHome ? "#D4A843" : "rgba(242,237,228,0.72)",
+                fontWeight: city.isHome || isActive ? 700 : 400,
+                fontFamily: "'Barlow Condensed', sans-serif",
+                letterSpacing: "0.05em", textTransform: "uppercase",
+              }}>
+                {city.name}
+              </text>
+              {/* Users */}
+              <text x={city.x} y={city.y + r + 1.9} textAnchor="middle" style={{
+                fontSize: "1.1px", fill: "rgba(255,255,255,0.22)", fontFamily: "monospace",
+              }}>
+                {city.users.toLocaleString()} users
+              </text>
+              {/* Board count */}
+              {hasBoard && (
+                <text x={city.x} y={city.y + r + 3.2} textAnchor="middle" style={{
+                  fontSize: "1.0px", fill: "#D4A84388", fontFamily: "'Barlow Condensed', sans-serif",
+                  letterSpacing: "0.04em",
+                }}>
+                  {(CITY_BOARDS[city.id] || []).length} board posts
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+
+    {/* SIDEBAR */}
+    <div style={{
+      width: "300px",
+      borderLeft: "1px solid rgba(255,255,255,0.05)",
+      background: "#0b090b",
+      display: "flex", flexDirection: "column",
+      flexShrink: 0,
+    }}>
+      {/* Sidebar header */}
+      <div style={{ padding: "18px 18px 14px", borderBottom: "1px solid rgba(255,255,255,0.04)", flexShrink: 0 }}>
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.18)", marginBottom: "3px",
+        }}>
+          Live Connections
+        </div>
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: "14px", fontWeight: 300, fontStyle: "italic",
+          color: "rgba(242,237,228,0.4)",
+        }}>
+          Cross-city activity feed
+        </div>
+      </div>
+
+      {/* Feed */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {visibleLinks.map((item, i) => {
+          const f = cityMap[item.from], t = cityMap[item.to];
+          const col = CAT_COLOR[item.category] || "#D4A843";
+          return (
+            <div key={item.id}
+              onMouseEnter={() => setHovered(item.id)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                padding: "12px 18px",
+                borderBottom: "1px solid rgba(255,255,255,0.03)",
+                borderLeft: `2px solid ${hovered === item.id ? col : "transparent"}`,
+                background: hovered === item.id ? "rgba(255,255,255,0.02)" : "transparent",
+                transition: "all 0.15s", cursor: "default",
+              }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: col, fontWeight: 600,
+                  padding: "1px 6px", border: `1px solid ${col}30`, background: `${col}0e`,
+                }}>
+                  {item.category}
+                </span>
+                <span style={{ fontFamily: "monospace", fontSize: "9px", color: "rgba(255,255,255,0.16)" }}>
+                  {item.time}
+                </span>
+              </div>
+              <div style={{ fontSize: "12px", color: "rgba(242,237,228,0.65)", marginBottom: "5px", lineHeight: 1.4 }}>
+                {item.desc}
+              </div>
+              <div style={{ display: "flex", gap: "5px", alignItems: "center", fontFamily: "'Barlow Condensed', sans-serif", fontSize: "10px" }}>
+                <span style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>{f?.name}</span>
+                <span style={{ color: col }}>→</span>
+                <span style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em" }}>{t?.name}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* City board entry points */}
+      <div style={{ padding: "16px 18px", borderTop: "1px solid rgba(255,255,255,0.04)", flexShrink: 0 }}>
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.16)", marginBottom: "12px",
+        }}>
+          City Employment Boards
+        </div>
+        {CITIES.filter(c => (CITY_BOARDS[c.id] || []).length > 0).map(city => (
+          <button key={city.id} onClick={() => setPanelCity(city)} style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            width: "100%", padding: "9px 12px", marginBottom: "5px",
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: "1px", cursor: "pointer",
+            transition: "all 0.15s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(212,168,67,0.25)"; e.currentTarget.style.background = "rgba(212,168,67,0.04)"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{
+                width: "6px", height: "6px", borderRadius: "50%",
+                background: city.isHome ? "#D4A843" : "#2ABBA8",
+              }} />
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase",
+                color: "rgba(242,237,228,0.6)", fontWeight: 500,
+              }}>
+                {city.name}
+              </span>
+            </div>
+            <span style={{
+              fontFamily: "monospace", fontSize: "10px",
+              color: "#D4A843", fontWeight: 600,
+            }}>
+              {(CITY_BOARDS[city.id] || []).length} posts →
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Privacy */}
+      <div style={{
+        padding: "10px 18px",
+        borderTop: "1px solid rgba(255,255,255,0.03)",
+        background: "rgba(0,0,0,0.2)",
+        flexShrink: 0,
+      }}>
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.1)", lineHeight: 1.7,
+        }}>
+          🔒 All posts anonymized · No individual identifiers · Aggregated city data only
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+);
+}
