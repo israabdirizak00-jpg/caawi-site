@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="so" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caawinaad — Beta Pilot Intake</title>
+  <style>
+    :root {
+      --green: #1B7340;
+      --green-light: #e8f5ee;
+      --green-dark: #145a32;
+      --accent: #F4A300;
+      --bg: #fafbfc;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --error: #dc2626;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .header {
+      background: var(--green);
+      color: white;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.01em;
+    }
+    .header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+    .container {
+      max-width: 640px;
+      margin: -1.5rem auto 2rem;
+      padding: 0 1rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+      padding: 2rem 1.5rem;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--green-light);
+    }
+    .section-label:first-of-type { margin-top: 0; }
+
+    .field { margin-bottom: 1.25rem; }
+    .field label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+    }
+    .field .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+      transition: border-color 0.15s;
+    }
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(27,115,64,0.1);
+    }
+
+    /* Checkbox / multi-select groups */
+    .check-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .check-group label {
+      font-weight: 400;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--green-light);
+      padding: 0.4rem 0.75rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      user-select: none;
+    }
+    .check-group label:hover { background: #d0eddb; }
+    .check-group input[type="checkbox"] { accent-color: var(--green); }
+    .check-group input:checked + span { font-weight: 600; }
+
+    .other-input {
+      display: none;
+      margin-top: 0.5rem;
+    }
+    .other-input.visible { display: block; }
+
+    /* Submit */
+    .submit-area { margin-top: 2rem; text-align: center; }
+    .btn-submit {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 0.85rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover { background: var(--green-dark); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Status */
+    .status {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      min-height: 1.5rem;
+    }
+    .status.error { color: var(--error); }
+    .status.success { color: var(--green); font-weight: 600; }
+
+    /* Success overlay */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+    .success-screen.visible { display: block; }
+    .success-screen .checkmark {
+      width: 64px;
+      height: 64px;
+      background: var(--green);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .success-screen .checkmark svg { stroke: white; }
+    .success-screen h2 {
+      font-size: 1.4rem;
+      color: var(--green-dark);
+      margin-bottom: 0.5rem;
+    }
+    .success-screen p { color: var(--muted); }
+    .btn-reset {
+      margin-top: 1.5rem;
+      background: none;
+      border: 1.5px solid var(--green);
+      color: var(--green);
+      padding: 0.6rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-reset:hover { background: var(--green-light); }
+
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1.4rem; }
+      .card { padding: 1.25rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Caawinaad</h1>
+  <p>Beta Pilot Intake Form</p>
+</div>
+
+<div class="container">
+  <div class="card">
+    <!-- FORM -->
+    <form id="intakeForm" autocomplete="off">
+
+      <div class="section-label">About You</div>
+
+      <div class="field">
+        <label for="source">How did you hear about us?</label>
+        <select id="source" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="Brian Coyle">Brian Coyle</option>
+          <option value="Soma Employment">Soma Employment</option>
+          <option value="Online">Online</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ageGroup">Age Group</label>
+        <select id="ageGroup" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="0–17">0–17</option>
+          <option value="18–24">18–24</option>
+          <option value="25–34">25–34</option>
+          <option value="35–44">35–44</option>
+          <option value="45–64">45–64</option>
+          <option value="65+">65+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="language">Preferred Language</label>
+        <select id="language" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="Soomaali">Soomaali</option>
+          <option value="Ingiriisi">Ingiriisi</option>
+          <option value="Labadaba">Labadaba</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="other-input" id="languageOtherWrap">
+          <input type="text" id="languageOther" placeholder="Which language?">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="yearsMN">Years in Minnesota</label>
+        <select id="yearsMN" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="Less than 1 year">Less than 1 year</option>
+          <option value="1–3 years">1–3 years</option>
+          <option value="3–7 years">3–7 years</option>
+          <option value="7+ years">7+ years</option>
+        </select>
+      </div>
+
+      <div class="section-label">Work &amp; Transportation</div>
+
+      <div class="field">
+        <label for="employment">Currently Employed?</label>
+        <select id="employment" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+          <option value="Part-time">Part-time</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Job Type <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+        <div class="check-group" data-field="jobType">
+          <label><input type="checkbox" value="Food / restaurant"><span>Food / restaurant</span></label>
+          <label><input type="checkbox" value="Healthcare / caregiving"><span>Healthcare / caregiving</span></label>
+          <label><input type="checkbox" value="Warehouse / delivery"><span>Warehouse / delivery</span></label>
+          <label><input type="checkbox" value="Retail / customer service"><span>Retail / customer service</span></label>
+          <label><input type="checkbox" value="Office / admin"><span>Office / admin</span></label>
+          <label><input type="checkbox" value="Construction / labor"><span>Construction / labor</span></label>
+          <label><input type="checkbox" value="Other" data-shows="jobTypeOtherWrap"><span>Other</span></label>
+        </div>
+        <div class="other-input" id="jobTypeOtherWrap">
+          <input type="text" id="jobTypeOther" placeholder="What kind of work?">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Transportation <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+        <div class="check-group" data-field="transportation">
+          <label><input type="checkbox" value="I have a car"><span>I have a car</span></label>
+          <label><input type="checkbox" value="Bus / public transit"><span>Bus / public transit</span></label>
+          <label><input type="checkbox" value="Rideshare"><span>Rideshare</span></label>
+          <label><input type="checkbox" value="Someone drives me"><span>Someone drives me</span></label>
+          <label><input type="checkbox" value="I walk"><span>I walk</span></label>
+        </div>
+      </div>
+
+      <div class="section-label">Digital Access &amp; Barriers</div>
+
+      <div class="field">
+        <label for="digitalAccess">Can you use a phone or computer to go online?</label>
+        <select id="digitalAccess" required>
+          <option value="" disabled selected>Select one…</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+          <option value="Tried but difficult">Tried but difficult</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>What barriers do you face? <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+        <div class="check-group" data-field="barriers">
+          <label><input type="checkbox" value="Language / English"><span>Language / English</span></label>
+          <label><input type="checkbox" value="Don't know where to start"><span>Don't know where to start</span></label>
+          <label><input type="checkbox" value="No internet or phone"><span>No internet or phone</span></label>
+          <label><input type="checkbox" value="Transportation"><span>Transportation</span></label>
+          <label><input type="checkbox" value="Don't trust agencies"><span>Don't trust agencies</span></label>
+          <label><input type="checkbox" value="Hard forms / paperwork"><span>Hard forms / paperwork</span></label>
+          <label><input type="checkbox" value="Not enough time"><span>Not enough time</span></label>
+          <label><input type="checkbox" value="Other" data-shows="barriersOtherWrap"><span>Other</span></label>
+        </div>
+        <div class="other-input" id="barriersOtherWrap">
+          <input type="text" id="barriersOther" placeholder="Tell us more…">
+        </div>
+      </div>
+
+      <div class="section-label">What Would Help You Most?</div>
+
+      <div class="field">
+        <label>Support Needs <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+        <div class="check-group" data-field="supportNeeds">
+          <label><input type="checkbox" value="Somali app or website"><span>Somali app or website</span></label>
+          <label><input type="checkbox" value="Someone to talk to in Somali"><span>Someone to talk to in Somali</span></label>
+          <label><input type="checkbox" value="Clear list of services"><span>Clear list of services</span></label>
+          <label><input type="checkbox" value="Help filling out forms"><span>Help filling out forms</span></label>
+          <label><input type="checkbox" value="Trusted community info"><span>Trusted community info</span></label>
+          <label><input type="checkbox" value="Other" data-shows="supportNeedsOtherWrap"><span>Other</span></label>
+        </div>
+        <div class="other-input" id="supportNeedsOtherWrap">
+          <input type="text" id="supportNeedsOther" placeholder="What else would help?">
+        </div>
+      </div>
+
+      <div class="submit-area">
+        <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+        <div class="status" id="status"></div>
+      </div>
+
+    </form>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="successScreen">
+      <div class="checkmark">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Mahadsanid!</h2>
+      <p>Your response has been recorded. We'll be in touch soon.</p>
+      <button class="btn-reset" onclick="resetForm()">Submit another response</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Caawinaad Beta Pilot &copy; 2026</div>
+
+<script>
+  // ─── CONFIG ──────────────────────────────────────────────
+  // Paste your Airtable Personal Access Token below (between the quotes).
+  // Keep this file private — do NOT commit the token to a public repo.
+  const AIRTABLE_PAT = 'YOUR_TOKEN_HERE';
+  const BASE_ID      = 'appwdl9UZUDdHl4uA';
+  const TABLE_ID     = 'tblqTVSOcKnx6Sxcs';
+  const API_URL      = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
+  // ─────────────────────────────────────────────────────────
+
+  // Show/hide "Other" text inputs for selects
+  document.getElementById('language').addEventListener('change', e => {
+    document.getElementById('languageOtherWrap')
+      .classList.toggle('visible', e.target.value === 'Other');
+  });
+
+  // Show/hide "Other" text inputs for checkbox groups
+  document.querySelectorAll('.check-group input[data-shows]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      document.getElementById(cb.dataset.shows)
+        .classList.toggle('visible', cb.checked);
+    });
+  });
+
+  // Gather checked values from a checkbox group
+  function getChecked(fieldName) {
+    const boxes = document.querySelectorAll(`[data-field="${fieldName}"] input:checked`);
+    return Array.from(boxes).map(b => b.value);
+  }
+
+  // Submit
+  document.getElementById('intakeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn    = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    status.className = 'status';
+    status.textContent = '';
+
+    const fields = {
+      "Source":              document.getElementById('source').value,
+      "Age Group":           document.getElementById('ageGroup').value,
+      "Language":            document.getElementById('language').value,
+      "Language Other":      document.getElementById('languageOther').value || '',
+      "Years in Minnesota":  document.getElementById('yearsMN').value,
+      "Employment Status":   document.getElementById('employment').value,
+      "Job Type":            getChecked('jobType'),
+      "Job Type Other":      document.getElementById('jobTypeOther').value || '',
+      "Transportation":      getChecked('transportation'),
+      "Digital Access":      document.getElementById('digitalAccess').value,
+      "Barriers":            getChecked('barriers'),
+      "Barriers Other":      document.getElementById('barriersOther').value || '',
+      "Support Needs":       getChecked('supportNeeds'),
+      "Support Needs Other": document.getElementById('supportNeedsOther').value || ''
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${AIRTABLE_PAT}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ records: [{ fields }] })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+      }
+
+      // Show success
+      document.getElementById('intakeForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+
+    } catch (err) {
+      status.className = 'status error';
+      status.textContent = 'Something went wrong — please try again. (' + err.message + ')';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit';
+    }
+  });
+
+  function resetForm() {
+    document.getElementById('intakeForm').reset();
+    document.getElementById('intakeForm').style.display = '';
+    document.getElementById('successScreen').classList.remove('visible');
+    document.querySelectorAll('.other-input').forEach(el => el.classList.remove('visible'));
+    document.getElementById('status').textContent = '';
+  }
+</script>
+
+</body>
+</html>
