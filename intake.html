@@ -1,468 +1,625 @@
 <!DOCTYPE html>
-<html lang="so" dir="ltr">
+<html lang="so">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caawinaad — Beta Pilot Intake</title>
-  <style>
-    :root {
-      --green: #1B7340;
-      --green-light: #e8f5ee;
-      --green-dark: #145a32;
-      --accent: #F4A300;
-      --bg: #fafbfc;
-      --card: #ffffff;
-      --text: #1a1a1a;
-      --muted: #6b7280;
-      --border: #d1d5db;
-      --error: #dc2626;
-      --radius: 10px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-    .header {
-      background: var(--green);
-      color: white;
-      padding: 2rem 1.5rem;
-      text-align: center;
-    }
-    .header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-      letter-spacing: -0.01em;
-    }
-    .header p {
-      opacity: 0.9;
-      font-size: 0.95rem;
-    }
-    .container {
-      max-width: 640px;
-      margin: -1.5rem auto 2rem;
-      padding: 0 1rem;
-    }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-      padding: 2rem 1.5rem;
-    }
-    .section-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--green);
-      margin: 2rem 0 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--green-light);
-    }
-    .section-label:first-of-type { margin-top: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caawi — Foomka Macluumaadka</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .field { margin-bottom: 1.25rem; }
-    .field label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 0.35rem;
-    }
-    .field .hint {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 0.35rem;
-    }
-    select, input[type="text"] {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background: white;
-      transition: border-color 0.15s;
-    }
-    select:focus, input[type="text"]:focus {
-      outline: none;
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(27,115,64,0.1);
-    }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8F4EE;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    color: #1a1a1a;
+  }
 
-    /* Checkbox / multi-select groups */
-    .check-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .check-group label {
-      font-weight: 400;
-      font-size: 0.88rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--green-light);
-      padding: 0.4rem 0.75rem;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.15s, box-shadow 0.15s;
-      user-select: none;
-    }
-    .check-group label:hover { background: #d0eddb; }
-    .check-group input[type="checkbox"] { accent-color: var(--green); }
-    .check-group input:checked + span { font-weight: 600; }
+  .page-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
 
-    .other-input {
-      display: none;
-      margin-top: 0.5rem;
-    }
-    .other-input.visible { display: block; }
+  /* HEADER */
+  .form-header {
+    background: #1E4D3F;
+    border-radius: 20px;
+    padding: 32px 24px 28px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-    /* Submit */
-    .submit-area { margin-top: 2rem; text-align: center; }
-    .btn-submit {
-      background: var(--green);
-      color: white;
-      border: none;
-      padding: 0.85rem 2.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-    }
-    .btn-submit:hover { background: var(--green-dark); }
-    .btn-submit:active { transform: scale(0.98); }
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  .form-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(201,150,58,0.12);
+    border-radius: 50%;
+  }
 
-    /* Status */
-    .status {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      min-height: 1.5rem;
-    }
-    .status.error { color: var(--error); }
-    .status.success { color: var(--green); font-weight: 600; }
+  .form-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 120px; height: 120px;
+    background: rgba(30,140,118,0.2);
+    border-radius: 50%;
+  }
 
-    /* Success overlay */
-    .success-screen {
-      display: none;
-      text-align: center;
-      padding: 3rem 1.5rem;
-    }
-    .success-screen.visible { display: block; }
-    .success-screen .checkmark {
-      width: 64px;
-      height: 64px;
-      background: var(--green);
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-    .success-screen .checkmark svg { stroke: white; }
-    .success-screen h2 {
-      font-size: 1.4rem;
-      color: var(--green-dark);
-      margin-bottom: 0.5rem;
-    }
-    .success-screen p { color: var(--muted); }
-    .btn-reset {
-      margin-top: 1.5rem;
-      background: none;
-      border: 1.5px solid var(--green);
-      color: var(--green);
-      padding: 0.6rem 1.5rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .btn-reset:hover { background: var(--green-light); }
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
 
-    .footer {
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
+  .logo-wrap svg {
+    height: 44px;
+    width: auto;
+    filter: brightness(0) invert(1);
+  }
 
-    @media (max-width: 480px) {
-      .header h1 { font-size: 1.4rem; }
-      .card { padding: 1.25rem 1rem; }
-    }
-  </style>
+  .header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.3px;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* PRIVACY NOTE */
+  .privacy-note {
+    background: #fff;
+    border-radius: 14px;
+    border-left: 4px solid #C9963A;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
+  .privacy-so {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1E4D3F;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .privacy-en {
+    font-size: 11px;
+    color: #888;
+    display: block;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #C9963A;
+    margin: 24px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e8e0d4;
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    margin-bottom: 10px;
+    border: 1px solid #ede8e0;
+  }
+
+  .q-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: #C9963A;
+    margin-bottom: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  .q-so {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E4D3F;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  .q-en {
+    font-size: 12px;
+    font-weight: 400;
+    color: #aaa;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  /* OPTION BUTTONS */
+  .options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .opt-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #F8F4EE;
+    border: 1.5px solid #e8e0d4;
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .opt-btn:hover { border-color: #1E8C76; background: #f0faf7; }
+
+  .opt-btn.selected {
+    border-color: #1E8C76;
+    background: #e8f5f1;
+  }
+
+  .opt-so {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1E4D3F;
+    line-height: 1.3;
+  }
+
+  .opt-btn.selected .opt-so { color: #1E4D3F; }
+
+  .opt-en {
+    font-size: 11px;
+    color: #bbb;
+    font-weight: 400;
+  }
+
+  .opt-btn.selected .opt-en { color: #1E8C76; }
+
+  /* YES/NO ROW */
+  .yn-row { display: flex; gap: 8px; }
+
+  .yn-btn {
+    flex: 1;
+    padding: 14px 10px;
+    border: 1.5px solid #e8e0d4;
+    border-radius: 12px;
+    background: #F8F4EE;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .yn-btn:hover { border-color: #1E8C76; background: #f0faf7; }
+  .yn-btn.selected { border-color: #1E8C76; background: #e8f5f1; }
+
+  .yn-so { font-size: 17px; font-weight: 700; color: #1E4D3F; display: block; }
+  .yn-en { font-size: 11px; color: #bbb; display: block; margin-top: 2px; }
+  .yn-btn.selected .yn-en { color: #1E8C76; }
+
+  /* CONDITIONAL */
+  .conditional-block {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #e8e0d4;
+  }
+
+  .cond-q-so { font-size: 15px; font-weight: 700; color: #1E4D3F; margin-bottom: 3px; }
+  .cond-q-en { font-size: 11px; color: #aaa; margin-bottom: 12px; }
+
+  /* OTHER POPUP */
+  .other-popup { margin-top: 10px; display: none; }
+  .other-popup.visible { display: block; }
+
+  .other-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1.5px solid #1E8C76;
+    border-radius: 10px;
+    background: #f0faf7;
+    color: #1E4D3F;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .other-input::placeholder { color: #bbb; font-size: 13px; }
+
+  /* SUBMIT */
+  .submit-btn {
+    width: 100%;
+    background: #1E8C76;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .submit-btn:hover { background: #1E4D3F; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .submit-so { display: block; font-size: 18px; font-weight: 700; }
+  .submit-en { display: block; font-size: 12px; opacity: 0.75; margin-top: 3px; font-weight: 400; }
+
+  /* SUCCESS */
+  .success-screen {
+    display: none;
+    background: #fff;
+    border-radius: 20px;
+    padding: 48px 24px;
+    text-align: center;
+    border: 1px solid #ede8e0;
+    margin-top: 20px;
+  }
+
+  .success-icon {
+    width: 64px; height: 64px;
+    background: #e8f5f1;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+  }
+
+  .success-so { font-size: 22px; font-weight: 700; color: #1E4D3F; margin-bottom: 6px; }
+  .success-en { font-size: 13px; color: #aaa; }
+
+  /* ERROR */
+  .error-msg {
+    display: none;
+    background: #fff0f0;
+    border: 1px solid #ffcccc;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #cc0000;
+    text-align: center;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #ccc;
+  }
+</style>
 </head>
 <body>
+<div class="page-wrap">
 
-<div class="header">
-  <h1>Caawinaad</h1>
-  <p>Beta Pilot Intake Form</p>
-</div>
-
-<div class="container">
-  <div class="card">
-    <!-- FORM -->
-    <form id="intakeForm" autocomplete="off">
-
-      <div class="section-label">About You</div>
-
-      <div class="field">
-        <label for="source">How did you hear about us?</label>
-        <select id="source" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="Brian Coyle">Brian Coyle</option>
-          <option value="Soma Employment">Soma Employment</option>
-          <option value="Online">Online</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="ageGroup">Age Group</label>
-        <select id="ageGroup" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="0–17">0–17</option>
-          <option value="18–24">18–24</option>
-          <option value="25–34">25–34</option>
-          <option value="35–44">35–44</option>
-          <option value="45–64">45–64</option>
-          <option value="65+">65+</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="language">Preferred Language</label>
-        <select id="language" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="Soomaali">Soomaali</option>
-          <option value="Ingiriisi">Ingiriisi</option>
-          <option value="Labadaba">Labadaba</option>
-          <option value="Other">Other</option>
-        </select>
-        <div class="other-input" id="languageOtherWrap">
-          <input type="text" id="languageOther" placeholder="Which language?">
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="yearsMN">Years in Minnesota</label>
-        <select id="yearsMN" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="Less than 1 year">Less than 1 year</option>
-          <option value="1–3 years">1–3 years</option>
-          <option value="3–7 years">3–7 years</option>
-          <option value="7+ years">7+ years</option>
-        </select>
-      </div>
-
-      <div class="section-label">Work &amp; Transportation</div>
-
-      <div class="field">
-        <label for="employment">Currently Employed?</label>
-        <select id="employment" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-          <option value="Part-time">Part-time</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Job Type <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
-        <div class="check-group" data-field="jobType">
-          <label><input type="checkbox" value="Food / restaurant"><span>Food / restaurant</span></label>
-          <label><input type="checkbox" value="Healthcare / caregiving"><span>Healthcare / caregiving</span></label>
-          <label><input type="checkbox" value="Warehouse / delivery"><span>Warehouse / delivery</span></label>
-          <label><input type="checkbox" value="Retail / customer service"><span>Retail / customer service</span></label>
-          <label><input type="checkbox" value="Office / admin"><span>Office / admin</span></label>
-          <label><input type="checkbox" value="Construction / labor"><span>Construction / labor</span></label>
-          <label><input type="checkbox" value="Other" data-shows="jobTypeOtherWrap"><span>Other</span></label>
-        </div>
-        <div class="other-input" id="jobTypeOtherWrap">
-          <input type="text" id="jobTypeOther" placeholder="What kind of work?">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Transportation <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
-        <div class="check-group" data-field="transportation">
-          <label><input type="checkbox" value="I have a car"><span>I have a car</span></label>
-          <label><input type="checkbox" value="Bus / public transit"><span>Bus / public transit</span></label>
-          <label><input type="checkbox" value="Rideshare"><span>Rideshare</span></label>
-          <label><input type="checkbox" value="Someone drives me"><span>Someone drives me</span></label>
-          <label><input type="checkbox" value="I walk"><span>I walk</span></label>
-        </div>
-      </div>
-
-      <div class="section-label">Digital Access &amp; Barriers</div>
-
-      <div class="field">
-        <label for="digitalAccess">Can you use a phone or computer to go online?</label>
-        <select id="digitalAccess" required>
-          <option value="" disabled selected>Select one…</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-          <option value="Tried but difficult">Tried but difficult</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>What barriers do you face? <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
-        <div class="check-group" data-field="barriers">
-          <label><input type="checkbox" value="Language / English"><span>Language / English</span></label>
-          <label><input type="checkbox" value="Don't know where to start"><span>Don't know where to start</span></label>
-          <label><input type="checkbox" value="No internet or phone"><span>No internet or phone</span></label>
-          <label><input type="checkbox" value="Transportation"><span>Transportation</span></label>
-          <label><input type="checkbox" value="Don't trust agencies"><span>Don't trust agencies</span></label>
-          <label><input type="checkbox" value="Hard forms / paperwork"><span>Hard forms / paperwork</span></label>
-          <label><input type="checkbox" value="Not enough time"><span>Not enough time</span></label>
-          <label><input type="checkbox" value="Other" data-shows="barriersOtherWrap"><span>Other</span></label>
-        </div>
-        <div class="other-input" id="barriersOtherWrap">
-          <input type="text" id="barriersOther" placeholder="Tell us more…">
-        </div>
-      </div>
-
-      <div class="section-label">What Would Help You Most?</div>
-
-      <div class="field">
-        <label>Support Needs <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
-        <div class="check-group" data-field="supportNeeds">
-          <label><input type="checkbox" value="Somali app or website"><span>Somali app or website</span></label>
-          <label><input type="checkbox" value="Someone to talk to in Somali"><span>Someone to talk to in Somali</span></label>
-          <label><input type="checkbox" value="Clear list of services"><span>Clear list of services</span></label>
-          <label><input type="checkbox" value="Help filling out forms"><span>Help filling out forms</span></label>
-          <label><input type="checkbox" value="Trusted community info"><span>Trusted community info</span></label>
-          <label><input type="checkbox" value="Other" data-shows="supportNeedsOtherWrap"><span>Other</span></label>
-        </div>
-        <div class="other-input" id="supportNeedsOtherWrap">
-          <input type="text" id="supportNeedsOther" placeholder="What else would help?">
-        </div>
-      </div>
-
-      <div class="submit-area">
-        <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
-        <div class="status" id="status"></div>
-      </div>
-
-    </form>
-
-    <!-- SUCCESS -->
-    <div class="success-screen" id="successScreen">
-      <div class="checkmark">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2>Mahadsanid!</h2>
-      <p>Your response has been recorded. We'll be in touch soon.</p>
-      <button class="btn-reset" onclick="resetForm()">Submit another response</button>
+  <div class="form-header">
+    <div class="logo-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="504 650 540 140" preserveAspectRatio="xMidYMid meet">
+        <g fill="#ffffff" fill-opacity="1"><g transform="translate(504.304677, 777.551625)"><g><path d="M 84.40625 -127.203125 C 99.195312 -127.203125 111.128906 -125.132812 120.203125 -121 C 121.265625 -120.46875 121.925781 -119.96875 122.1875 -119.5 C 122.457031 -119.03125 122.726562 -118 123 -116.40625 L 125.40625 -90 C 125.40625 -89.601562 125.070312 -89.335938 124.40625 -89.203125 C 123.738281 -89.066406 123.269531 -89.265625 123 -89.796875 C 119.53125 -100.734375 114.363281 -109.066406 107.5 -114.796875 C 100.632812 -120.535156 92.132812 -123.40625 82 -123.40625 C 72.269531 -123.40625 63.570312 -120.96875 55.90625 -116.09375 C 48.238281 -111.226562 42.269531 -104.226562 38 -95.09375 C 33.726562 -85.96875 31.59375 -75.335938 31.59375 -63.203125 C 31.59375 -51.203125 33.859375 -40.5 38.390625 -31.09375 C 42.929688 -21.695312 49.132812 -14.398438 57 -9.203125 C 64.863281 -4.003906 73.726562 -1.40625 83.59375 -1.40625 C 93.332031 -1.40625 101.429688 -3.96875 107.890625 -9.09375 C 114.359375 -14.226562 120.0625 -22.394531 125 -33.59375 C 125.132812 -34 125.535156 -34.132812 126.203125 -34 C 126.867188 -33.863281 127.203125 -33.664062 127.203125 -33.40625 L 124.59375 -9.40625 C 124.46875 -7.800781 124.238281 -6.796875 123.90625 -6.390625 C 123.570312 -5.992188 122.867188 -5.53125 121.796875 -5 C 109.796875 -0.0625 97.0625 2.40625 83.59375 2.40625 C 69.332031 2.40625 56.597656 -0.289062 45.390625 -5.6875 C 34.191406 -11.09375 25.457031 -18.695312 19.1875 -28.5 C 12.925781 -38.300781 9.796875 -49.535156 9.796875 -62.203125 C 9.796875 -74.734375 13.0625 -85.929688 19.59375 -95.796875 C 26.132812 -105.660156 35.070312 -113.359375 46.40625 -118.890625 C 57.738281 -124.429688 70.40625 -127.203125 84.40625 -127.203125 Z M 84.40625 -127.203125 "/></g></g></g>
+        <g fill="#ffffff" fill-opacity="1"><g transform="translate(640.901033, 777.551625)"><g><path d="M 83.59375 -10.796875 C 84.132812 -10.796875 84.46875 -10.492188 84.59375 -9.890625 C 84.726562 -9.296875 84.53125 -8.863281 84 -8.59375 L 63.40625 1.203125 C 62.863281 1.460938 62.257812 1.59375 61.59375 1.59375 C 59.59375 1.59375 57.691406 0.425781 55.890625 -1.90625 C 54.097656 -4.238281 52.9375 -7.335938 52.40625 -11.203125 L 43.203125 -4.796875 C 40.003906 -2.535156 37.101562 -0.9375 34.5 0 C 31.894531 0.9375 28.992188 1.40625 25.796875 1.40625 C 20.328125 1.40625 16.160156 0.101562 13.296875 -2.5 C 10.429688 -5.101562 9 -8.535156 9 -12.796875 C 9 -16.398438 9.960938 -19.332031 11.890625 -21.59375 C 13.828125 -23.863281 16.296875 -25.695312 19.296875 -27.09375 C 22.296875 -28.5 26.726562 -30.269531 32.59375 -32.40625 L 52 -39.59375 L 52 -51.59375 C 52 -59.863281 51.164062 -65.898438 49.5 -69.703125 C 47.832031 -73.503906 45.195312 -75.40625 41.59375 -75.40625 C 37.195312 -75.40625 34.03125 -73.769531 32.09375 -70.5 C 30.164062 -67.226562 29 -63.59375 28.59375 -59.59375 C 27.800781 -52.800781 24.40625 -49.40625 18.40625 -49.40625 C 15.46875 -49.40625 13.296875 -50.070312 11.890625 -51.40625 C 10.492188 -52.738281 9.796875 -54.40625 9.796875 -56.40625 C 9.796875 -60.132812 12.03125 -63.765625 16.5 -67.296875 C 20.96875 -70.828125 26.367188 -73.691406 32.703125 -75.890625 C 39.035156 -78.097656 44.601562 -79.203125 49.40625 -79.203125 C 55.132812 -79.203125 59.695312 -77.398438 63.09375 -73.796875 C 66.5 -70.203125 68.203125 -64.800781 68.203125 -57.59375 L 68.203125 -21.59375 C 68.203125 -17.46875 68.867188 -14.335938 70.203125 -12.203125 C 71.535156 -10.066406 73.46875 -9 76 -9 C 78 -9 80.398438 -9.597656 83.203125 -10.796875 Z M 52 -14.40625 L 52 -36.203125 L 40 -31.203125 C 36.53125 -29.867188 33.695312 -28.300781 31.5 -26.5 C 29.300781 -24.695312 28.203125 -22.128906 28.203125 -18.796875 C 28.203125 -15.597656 29.234375 -13.03125 31.296875 -11.09375 C 33.367188 -9.164062 35.867188 -8.203125 38.796875 -8.203125 C 41.203125 -8.203125 43.738281 -9 46.40625 -10.59375 Z M 52 -14.40625 "/></g></g></g>
+        <g fill="#ffffff" fill-opacity="1"><g transform="translate(724.898795, 777.551625)"><g><path d="M 83.59375 -10.796875 C 84.132812 -10.796875 84.46875 -10.492188 84.59375 -9.890625 C 84.726562 -9.296875 84.53125 -8.863281 84 -8.59375 L 63.40625 1.203125 C 62.863281 1.460938 62.257812 1.59375 61.59375 1.59375 C 59.59375 1.59375 57.691406 0.425781 55.890625 -1.90625 C 54.097656 -4.238281 52.9375 -7.335938 52.40625 -11.203125 L 43.203125 -4.796875 C 40.003906 -2.535156 37.101562 -0.9375 34.5 0 C 31.894531 0.9375 28.992188 1.40625 25.796875 1.40625 C 20.328125 1.40625 16.160156 0.101562 13.296875 -2.5 C 10.429688 -5.101562 9 -8.535156 9 -12.796875 C 9 -16.398438 9.960938 -19.332031 11.890625 -21.59375 C 13.828125 -23.863281 16.296875 -25.695312 19.296875 -27.09375 C 22.296875 -28.5 26.726562 -30.269531 32.59375 -32.40625 L 52 -39.59375 L 52 -51.59375 C 52 -59.863281 51.164062 -65.898438 49.5 -69.703125 C 47.832031 -73.503906 45.195312 -75.40625 41.59375 -75.40625 C 37.195312 -75.40625 34.03125 -73.769531 32.09375 -70.5 C 30.164062 -67.226562 29 -63.59375 28.59375 -59.59375 C 27.800781 -52.800781 24.40625 -49.40625 18.40625 -49.40625 C 15.46875 -49.40625 13.296875 -50.070312 11.890625 -51.40625 C 10.492188 -52.738281 9.796875 -54.40625 9.796875 -56.40625 C 9.796875 -60.132812 12.03125 -63.765625 16.5 -67.296875 C 20.96875 -70.828125 26.367188 -73.691406 32.703125 -75.890625 C 39.035156 -78.097656 44.601562 -79.203125 49.40625 -79.203125 C 55.132812 -79.203125 59.695312 -77.398438 63.09375 -73.796875 C 66.5 -70.203125 68.203125 -64.800781 68.203125 -57.59375 L 68.203125 -21.59375 C 68.203125 -17.46875 68.867188 -14.335938 70.203125 -12.203125 C 71.535156 -10.066406 73.46875 -9 76 -9 C 78 -9 80.398438 -9.597656 83.203125 -10.796875 Z M 52 -14.40625 L 52 -36.203125 L 40 -31.203125 C 36.53125 -29.867188 33.695312 -28.300781 31.5 -26.5 C 29.300781 -24.695312 28.203125 -22.128906 28.203125 -18.796875 C 28.203125 -15.597656 29.234375 -13.03125 31.296875 -11.09375 C 33.367188 -9.164062 35.867188 -8.203125 38.796875 -8.203125 C 41.203125 -8.203125 43.738281 -9 46.40625 -10.59375 Z M 52 -14.40625 "/></g></g></g>
+        <g fill="#ffffff" fill-opacity="1"><g transform="translate(806.496604, 777.551625)"><g><path d="M 137.59375 -77.203125 C 138 -77.203125 138.203125 -76.800781 138.203125 -76 C 138.203125 -75.195312 138 -74.796875 137.59375 -74.796875 C 134 -74.796875 130.832031 -73.460938 128.09375 -70.796875 C 125.363281 -68.128906 122.734375 -63.863281 120.203125 -58 L 95.40625 -0.203125 C 95.40625 0.328125 94.738281 0.59375 93.40625 0.59375 C 91.9375 0.59375 91.132812 0.328125 91 -0.203125 L 67.40625 -48.203125 L 46.796875 -0.203125 C 46.796875 0.328125 46.128906 0.59375 44.796875 0.59375 C 43.597656 0.59375 42.800781 0.328125 42.40625 -0.203125 L 12.796875 -60.59375 C 9.867188 -66.332031 7.40625 -70.132812 5.40625 -72 C 3.40625 -73.863281 1.003906 -74.796875 -1.796875 -74.796875 C -2.203125 -74.796875 -2.40625 -75.195312 -2.40625 -76 C -2.40625 -76.800781 -2.203125 -77.203125 -1.796875 -77.203125 C 0.597656 -77.203125 2.53125 -77.132812 4 -77 L 15.59375 -76.796875 L 29.203125 -77 C 31.203125 -77.132812 33.9375 -77.203125 37.40625 -77.203125 C 37.800781 -77.203125 38 -76.800781 38 -76 C 38 -75.195312 37.800781 -74.796875 37.40625 -74.796875 C 30.332031 -74.796875 26.796875 -73.265625 26.796875 -70.203125 C 26.796875 -69.398438 27.128906 -68.332031 27.796875 -67 L 51.40625 -22 L 64.59375 -53.59375 L 61.203125 -60.59375 C 58.265625 -66.46875 55.992188 -70.300781 54.390625 -72.09375 C 52.796875 -73.894531 50.734375 -74.796875 48.203125 -74.796875 C 47.929688 -74.796875 47.796875 -75.195312 47.796875 -76 C 47.796875 -76.800781 47.929688 -77.203125 48.203125 -77.203125 C 50.460938 -77.203125 52.328125 -77.132812 53.796875 -77 L 64.203125 -76.796875 L 78 -77 C 80 -77.132812 82.664062 -77.203125 86 -77.203125 C 86.269531 -77.203125 86.40625 -76.800781 86.40625 -76 C 86.40625 -75.195312 86.269531 -74.796875 86 -74.796875 C 82.9375 -74.796875 80.503906 -74.394531 78.703125 -73.59375 C 76.898438 -72.800781 76 -71.601562 76 -70 C 76 -69.332031 76.332031 -68.332031 77 -67 L 100 -21.796875 L 115 -58.40625 C 116.0625 -61.195312 116.59375 -63.460938 116.59375 -65.203125 C 116.59375 -68.265625 115.394531 -70.628906 113 -72.296875 C 110.601562 -73.960938 107.203125 -74.796875 102.796875 -74.796875 C 102.398438 -74.796875 102.203125 -75.195312 102.203125 -76 C 102.203125 -76.800781 102.398438 -77.203125 102.796875 -77.203125 C 106.398438 -77.203125 109.066406 -77.132812 110.796875 -77 L 122.796875 -76.796875 L 130.796875 -77 C 132.128906 -77.132812 134.394531 -77.203125 137.59375 -77.203125 Z M 137.59375 -77.203125 "/></g></g></g>
+        <g fill="#ffffff" fill-opacity="1"><g transform="translate(942.49296, 777.551625)"><g><path d="M 27.203125 -100.203125 C 23.734375 -100.203125 21.03125 -101.132812 19.09375 -103 C 17.164062 -104.863281 16.203125 -107.53125 16.203125 -111 C 16.203125 -114.332031 17.164062 -116.898438 19.09375 -118.703125 C 21.03125 -120.503906 23.734375 -121.40625 27.203125 -121.40625 C 30.535156 -121.40625 33.132812 -120.503906 35 -118.703125 C 36.863281 -116.898438 37.796875 -114.332031 37.796875 -111 C 37.796875 -107.53125 36.894531 -104.863281 35.09375 -103 C 33.300781 -101.132812 30.671875 -100.203125 27.203125 -100.203125 Z M 8.796875 0 C 8.398438 0 8.203125 -0.398438 8.203125 -1.203125 C 8.203125 -2.003906 8.398438 -2.40625 8.796875 -2.40625 C 13.328125 -2.40625 16.328125 -3.335938 17.796875 -5.203125 C 19.265625 -7.066406 20 -10.734375 20 -16.203125 L 20 -52.59375 C 20 -57.132812 19.53125 -60.4375 18.59375 -62.5 C 17.664062 -64.5625 16.066406 -65.59375 13.796875 -65.59375 C 11.796875 -65.59375 9.195312 -64.796875 6 -63.203125 L 5.796875 -63.203125 C 5.265625 -63.203125 4.863281 -63.535156 4.59375 -64.203125 C 4.332031 -64.867188 4.398438 -65.332031 4.796875 -65.59375 L 33.59375 -79 L 34.203125 -79.203125 C 34.734375 -79.203125 35.296875 -78.898438 35.890625 -78.296875 C 36.492188 -77.703125 36.796875 -77.203125 36.796875 -76.796875 L 36.796875 -72.59375 C 36.535156 -67 36.40625 -60.398438 36.40625 -52.796875 L 36.40625 -16.203125 C 36.40625 -10.734375 37.171875 -7.066406 38.703125 -5.203125 C 40.234375 -3.335938 43.265625 -2.40625 47.796875 -2.40625 C 48.203125 -2.40625 48.40625 -2.003906 48.40625 -1.203125 C 48.40625 -0.398438 48.203125 0 47.796875 0 C 44.460938 0 41.796875 -0.0664062 39.796875 -0.203125 L 28.203125 -0.40625 L 16.59375 -0.203125 C 14.726562 -0.0664062 12.128906 0 8.796875 0 Z M 8.796875 0 "/></g></g></g>
+        <g fill="#C9963A" fill-opacity="1"><g transform="translate(995, 733)"><path d="M 22.792969 0.308594 L 28.105469 17.496094 L 45.292969 17.496094 L 31.386719 28.121094 L 36.699219 45.308594 L 22.792969 34.6875 L 8.886719 45.308594 L 14.199219 28.121094 L 0.292969 17.496094 L 17.484375 17.496094 Z"/></g></g>
+      </svg>
     </div>
+    <div class="header-title">Foomka Macluumaadka</div>
+    <div class="header-sub">Community Information Form · caawi.co</div>
   </div>
-</div>
 
-<div class="footer">Caawinaad Beta Pilot &copy; 2026</div>
+  <div class="privacy-note">
+    <span class="privacy-so">Macluumaadkaagu waa qarsoodi. Lama wadaagi doono cidna.</span>
+    <span class="privacy-en">Your information is confidential. It will not be shared with anyone.</span>
+  </div>
+
+  <div id="form-body">
+
+    <div class="section-label">Macluumaadkaaga · About You</div>
+
+    <div class="q-card">
+      <div class="q-num">01</div>
+      <div class="q-so">Immisa jir ayaad tahay?</div>
+      <div class="q-en">How old are you?</div>
+      <div class="options-grid" id="age-opts">
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">0–17</span><span class="opt-en">Child / youth</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">18–24</span><span class="opt-en">Young adult</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">25–34</span><span class="opt-en">Adult</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">35–44</span><span class="opt-en">Adult</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">45–64</span><span class="opt-en">Adult</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'age-opts')"><span class="opt-so">65+</span><span class="opt-en">Older adult</span></button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">02</div>
+      <div class="q-so">Luqadda aad ku hadashaa mid keee weeye?</div>
+      <div class="q-en">What language do you speak best?</div>
+      <div class="options-grid" id="lang-opts">
+        <button class="opt-btn" onclick="selectOne(this,'lang-opts')"><span class="opt-so">Soomaali</span><span class="opt-en">Somali</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'lang-opts')"><span class="opt-so">Ingiriisi</span><span class="opt-en">English</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'lang-opts')"><span class="opt-so">Labadaba</span><span class="opt-en">Both</span></button>
+        <button class="opt-btn" onclick="toggleOther(this,'lang-opts','lang-other')"><span class="opt-so">Mid kale</span><span class="opt-en">Other</span></button>
+      </div>
+      <div class="other-popup" id="lang-other">
+        <input class="other-input" id="lang-other-input" type="text" placeholder="Luqadda aad ku hadashaa · Write your language" />
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">03</div>
+      <div class="q-so">Immisa sano ayaad ku noolayd Minnesota?</div>
+      <div class="q-en">How long have you lived in Minnesota?</div>
+      <div class="options-grid" id="mn-opts">
+        <button class="opt-btn" onclick="selectOne(this,'mn-opts')"><span class="opt-so">1 sano ka yar</span><span class="opt-en">Less than 1 year</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'mn-opts')"><span class="opt-so">1–3 sano</span><span class="opt-en">1–3 years</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'mn-opts')"><span class="opt-so">3–7 sano</span><span class="opt-en">3–7 years</span></button>
+        <button class="opt-btn" onclick="selectOne(this,'mn-opts')"><span class="opt-so">7+ sano</span><span class="opt-en">7+ years</span></button>
+      </div>
+    </div>
+
+    <div class="section-label">Xaaladda Shaqada · Employment</div>
+
+    <div class="q-card">
+      <div class="q-num">04</div>
+      <div class="q-so">Hadda ma shaqeysaa?</div>
+      <div class="q-en">Are you currently working?</div>
+      <div class="yn-row" id="working-opts">
+        <button class="yn-btn" onclick="selectWorkStatus(this,'Haa')"><span class="yn-so">Haa</span><span class="yn-en">Yes</span></button>
+        <button class="yn-btn" onclick="selectWorkStatus(this,'Maya')"><span class="yn-so">Maya</span><span class="yn-en">No</span></button>
+        <button class="yn-btn" onclick="selectWorkStatus(this,'Wax yar')"><span class="yn-so">Wax yar</span><span class="yn-en">Part-time</span></button>
+      </div>
+      <div class="conditional-block" id="job-type-block" style="display:none;">
+        <div class="cond-q-so" id="job-type-label-so"></div>
+        <div class="cond-q-en" id="job-type-label-en"></div>
+        <div class="options-grid" id="job-type-opts">
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Cunto / Makhaayad</span><span class="opt-en">Food / restaurant</span></button>
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Xanaanada / Daryeelka</span><span class="opt-en">Healthcare / caregiving</span></button>
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Kaydka / Raritaanka</span><span class="opt-en">Warehouse / delivery</span></button>
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Dukaan / Adeegga</span><span class="opt-en">Retail / customer service</span></button>
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Xafiis / Maaraynta</span><span class="opt-en">Office / admin</span></button>
+          <button class="opt-btn" onclick="toggle(this,'job-type-opts')"><span class="opt-so">Dhismaha</span><span class="opt-en">Construction / labor</span></button>
+          <button class="opt-btn" onclick="toggleOther(this,'job-type-opts','job-other')"><span class="opt-so">Kale</span><span class="opt-en">Other</span></button>
+        </div>
+        <div class="other-popup" id="job-other">
+          <input class="other-input" id="job-other-input" type="text" placeholder="Sharax wax yar · Describe the work" />
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Gaadhitaanka · Access & Mobility</div>
+
+    <div class="q-card">
+      <div class="q-num">05</div>
+      <div class="q-so">Sideed u gaarta meesha aad u baahan tahay?</div>
+      <div class="q-en">How do you get around? (Select all that apply)</div>
+      <div class="options-grid" id="transit-opts">
+        <button class="opt-btn" onclick="toggle(this,'transit-opts')"><span class="opt-so">Gaadhi leeyahay</span><span class="opt-en">I have a car</span></button>
+        <button class="opt-btn" onclick="toggle(this,'transit-opts')"><span class="opt-so">Baaska</span><span class="opt-en">Bus / public transit</span></button>
+        <button class="opt-btn" onclick="toggle(this,'transit-opts')"><span class="opt-so">Uber / Lyft</span><span class="opt-en">Rideshare</span></button>
+        <button class="opt-btn" onclick="toggle(this,'transit-opts')"><span class="opt-so">Cid igasoo qaadda</span><span class="opt-en">Someone drives me</span></button>
+        <button class="opt-btn" onclick="toggle(this,'transit-opts')"><span class="opt-so">Lugaha</span><span class="opt-en">I walk</span></button>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">06</div>
+      <div class="q-so">Ma isticmaashaa boggagga internetka ama apps-yada si aad u raadinayso macluumaad — tusaale ahaan, codsiga shaqo, cawo dhakhtarka, ama faa'iidooyinka?</div>
+      <div class="q-en">Have you used websites or apps to search for information — e.g. applying for a job, booking a doctor, or finding benefits?</div>
+      <div class="yn-row" id="digital-opts">
+        <button class="yn-btn" onclick="selectOne(this,'digital-opts')"><span class="yn-so">Haa</span><span class="yn-en">Yes</span></button>
+        <button class="yn-btn" onclick="selectOne(this,'digital-opts')"><span class="yn-so">Maya</span><span class="yn-en">No</span></button>
+        <button class="yn-btn" onclick="selectOne(this,'digital-opts')"><span class="yn-so">Isku dayay, adag bay ahayd</span><span class="yn-en">Tried but difficult</span></button>
+      </div>
+    </div>
+
+    <div class="section-label">Caqabadaha · Barriers & Support</div>
+
+    <div class="q-card">
+      <div class="q-num">07</div>
+      <div class="q-so">Haddii ay jirtaa wax adag oo kula kulmay markaad raadinaysay macluumaad ama adeegyada muhiimka ah, maxay tahay?</div>
+      <div class="q-en">What has been hard about finding information or services? (Select all that apply)</div>
+      <div class="options-grid" id="barrier-opts">
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Luqadda / Ingiriisiga</span><span class="opt-en">Language / English</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Ma garanayso meesha la bilaabo</span><span class="opt-en">Don't know where to start</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Internetka la'aanta</span><span class="opt-en">No internet or phone access</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Gaadhiga</span><span class="opt-en">Transportation</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Ururrada kama aaminid</span><span class="opt-en">Don't trust agencies</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Foomamka adag</span><span class="opt-en">Hard forms / paperwork</span></button>
+        <button class="opt-btn" onclick="toggle(this,'barrier-opts')"><span class="opt-so">Waqti la'aanta</span><span class="opt-en">Not enough time</span></button>
+        <button class="opt-btn" onclick="toggleOther(this,'barrier-opts','barrier-other')"><span class="opt-so">Kale</span><span class="opt-en">Something else</span></button>
+      </div>
+      <div class="other-popup" id="barrier-other">
+        <input class="other-input" id="barrier-other-input" type="text" placeholder="Sharax wax yar · Describe briefly" />
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">08</div>
+      <div class="q-so">Maxay kaa caawin lahayd si aad uga faa'iidaysato macluumaadka iyo adeegyada?</div>
+      <div class="q-en">What would help you most in finding information and services? (Select all that apply)</div>
+      <div class="options-grid" id="support-opts">
+        <button class="opt-btn" onclick="toggle(this,'support-opts')"><span class="opt-so">App ama bogga Soomaaliga ah</span><span class="opt-en">App or website in Somali</span></button>
+        <button class="opt-btn" onclick="toggle(this,'support-opts')"><span class="opt-so">Cid Soomaali ku hadasha</span><span class="opt-en">Someone to talk to in Somali</span></button>
+        <button class="opt-btn" onclick="toggle(this,'support-opts')"><span class="opt-so">Liis adeegyo la heli karo</span><span class="opt-en">Clear list of available services</span></button>
+        <button class="opt-btn" onclick="toggle(this,'support-opts')"><span class="opt-so">Caawinta buuxinta foomamka</span><span class="opt-en">Help filling out forms</span></button>
+        <button class="opt-btn" onclick="toggle(this,'support-opts')"><span class="opt-so">Macluumaad bulshada ka yimaada</span><span class="opt-en">Trusted info from community</span></button>
+        <button class="opt-btn" onclick="toggleOther(this,'support-opts','support-other')"><span class="opt-so">Kale</span><span class="opt-en">Something else</span></button>
+      </div>
+      <div class="other-popup" id="support-other">
+        <input class="other-input" id="support-other-input" type="text" placeholder="Sharax wax yar · Describe briefly" />
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+      <span class="submit-so">Gudbi Foomka</span>
+      <span class="submit-en">Submit Form</span>
+    </button>
+
+    <div class="error-msg" id="error-msg">Khalad ayaa dhacay. Markale isku day. · Something went wrong. Please try again.</div>
+
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <div class="success-so">Mahadsanid!</div>
+    <div class="success-en">Thank you — your response has been recorded.</div>
+  </div>
+
+  <div class="footer">caawi.co · isra@caawi.co</div>
+
+</div>
 
 <script>
-  // ─── CONFIG ──────────────────────────────────────────────
-  // Paste your Airtable Personal Access Token below (between the quotes).
-  // Keep this file private — do NOT commit the token to a public repo.
-  const AIRTABLE_PAT = 'YOUR_TOKEN_HERE';
-  const BASE_ID      = 'appwdl9UZUDdHl4uA';
-  const TABLE_ID     = 'tblqTVSOcKnx6Sxcs';
-  const API_URL      = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
-  // ─────────────────────────────────────────────────────────
+  const AIRTABLE_TOKEN = 'patrafjnUO0TtP62q.86f77f082aeee11d928555c2efe78a7a887a44a6f2fee46fd4a614c7d0189c87';
+  const BASE_ID = 'appwdl9UZUDdHl4uA';
+  const TABLE_NAME = 'Intake Responses';
 
-  // Show/hide "Other" text inputs for selects
-  document.getElementById('language').addEventListener('change', e => {
-    document.getElementById('languageOtherWrap')
-      .classList.toggle('visible', e.target.value === 'Other');
-  });
-
-  // Show/hide "Other" text inputs for checkbox groups
-  document.querySelectorAll('.check-group input[data-shows]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      document.getElementById(cb.dataset.shows)
-        .classList.toggle('visible', cb.checked);
-    });
-  });
-
-  // Gather checked values from a checkbox group
-  function getChecked(fieldName) {
-    const boxes = document.querySelectorAll(`[data-field="${fieldName}"] input:checked`);
-    return Array.from(boxes).map(b => b.value);
+  function selectOne(btn, groupId) {
+    document.getElementById(groupId).querySelectorAll('.opt-btn,.yn-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
   }
 
-  // Submit
-  document.getElementById('intakeForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn    = document.getElementById('submitBtn');
-    const status = document.getElementById('status');
-    btn.disabled = true;
-    btn.textContent = 'Submitting…';
-    status.className = 'status';
-    status.textContent = '';
+  function toggle(btn) {
+    btn.classList.toggle('selected');
+  }
 
-    const fields = {
-      "Source":              document.getElementById('source').value,
-      "Age Group":           document.getElementById('ageGroup').value,
-      "Language":            document.getElementById('language').value,
-      "Language Other":      document.getElementById('languageOther').value || '',
-      "Years in Minnesota":  document.getElementById('yearsMN').value,
-      "Employment Status":   document.getElementById('employment').value,
-      "Job Type":            getChecked('jobType'),
-      "Job Type Other":      document.getElementById('jobTypeOther').value || '',
-      "Transportation":      getChecked('transportation'),
-      "Digital Access":      document.getElementById('digitalAccess').value,
-      "Barriers":            getChecked('barriers'),
-      "Barriers Other":      document.getElementById('barriersOther').value || '',
-      "Support Needs":       getChecked('supportNeeds'),
-      "Support Needs Other": document.getElementById('supportNeedsOther').value || ''
+  function toggleOther(btn, groupId, popupId) {
+    btn.classList.toggle('selected');
+    var popup = document.getElementById(popupId);
+    popup.classList.toggle('visible', btn.classList.contains('selected'));
+    if (btn.classList.contains('selected')) popup.querySelector('input').focus();
+  }
+
+  function selectWorkStatus(btn, so) {
+    document.getElementById('working-opts').querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    var block = document.getElementById('job-type-block');
+    var labelSo = document.getElementById('job-type-label-so');
+    var labelEn = document.getElementById('job-type-label-en');
+    if (so === 'Haa') {
+      block.style.display = 'block';
+      labelSo.textContent = 'Shaqada noocee ah ayaad haystaa?';
+      labelEn.textContent = 'What kind of work do you currently have?';
+    } else if (so === 'Wax yar') {
+      block.style.display = 'block';
+      labelSo.textContent = 'Shaqada noocee ah ayaad haystaa, ama maxaad raadinaysaa?';
+      labelEn.textContent = 'What kind of work do you have or are looking for?';
+    } else {
+      block.style.display = 'none';
+      document.getElementById('job-type-opts').querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    }
+  }
+
+  function getSelected(groupId) {
+    var selected = [];
+    document.getElementById(groupId).querySelectorAll('.opt-btn.selected, .yn-btn.selected').forEach(b => {
+      selected.push(b.querySelector('.opt-so, .yn-so').textContent.trim());
+    });
+    return selected;
+  }
+
+  function getSingleSelected(groupId) {
+    var btns = document.getElementById(groupId).querySelectorAll('.opt-btn.selected, .yn-btn.selected');
+    return btns.length ? btns[0].querySelector('.opt-so, .yn-so').textContent.trim() : null;
+  }
+
+  async function submitForm() {
+    var btn = document.getElementById('submit-btn');
+    var errMsg = document.getElementById('error-msg');
+    btn.disabled = true;
+    btn.querySelector('.submit-so').textContent = 'Sugaya...';
+    btn.querySelector('.submit-en').textContent = 'Submitting...';
+    errMsg.style.display = 'none';
+
+    var langSelected = getSingleSelected('lang-opts');
+    var langOther = document.getElementById('lang-other-input').value.trim();
+    var language = (langSelected === 'Mid kale' && langOther) ? langOther : langSelected;
+
+    var jobTypes = getSelected('job-type-opts').filter(v => v !== 'Kale');
+    var jobOther = document.getElementById('job-other-input').value.trim();
+    if (jobOther) jobTypes.push(jobOther);
+
+    var barriers = getSelected('barrier-opts').filter(v => v !== 'Kale');
+    var barrierOther = document.getElementById('barrier-other-input').value.trim();
+    if (barrierOther) barriers.push(barrierOther);
+
+    var support = getSelected('support-opts').filter(v => v !== 'Kale');
+    var supportOther = document.getElementById('support-other-input').value.trim();
+    if (supportOther) support.push(supportOther);
+
+    var fields = {
+      'Source': 'Online',
+      'Age Group': getSingleSelected('age-opts'),
+      'Language': language,
+      'Years in Minnesota': getSingleSelected('mn-opts'),
+      'Employment Status': getSingleSelected('working-opts'),
+      'Transportation': getSelected('transit-opts'),
+      'Digital Access': getSingleSelected('digital-opts'),
+      'Barriers': barriers,
+      'Support Needs': support
     };
 
+    if (jobTypes.length) fields['Job Type'] = jobTypes;
+
+    Object.keys(fields).forEach(k => { if (!fields[k] || (Array.isArray(fields[k]) && !fields[k].length)) delete fields[k]; });
+
     try {
-      const res = await fetch(API_URL, {
+      var res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(TABLE_NAME), {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${AIRTABLE_PAT}`,
+          'Authorization': 'Bearer ' + AIRTABLE_TOKEN,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ records: [{ fields }] })
+        body: JSON.stringify({ fields: fields })
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
+      if (res.ok) {
+        document.getElementById('form-body').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
+        window.scrollTo(0, 0);
+      } else {
+        var data = await res.json();
+        console.error(data);
+        errMsg.style.display = 'block';
+        btn.disabled = false;
+        btn.querySelector('.submit-so').textContent = 'Gudbi Foomka';
+        btn.querySelector('.submit-en').textContent = 'Submit Form';
       }
-
-      // Show success
-      document.getElementById('intakeForm').style.display = 'none';
-      document.getElementById('successScreen').classList.add('visible');
-
-    } catch (err) {
-      status.className = 'status error';
-      status.textContent = 'Something went wrong — please try again. (' + err.message + ')';
-    } finally {
+    } catch(e) {
+      errMsg.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = 'Submit';
+      btn.querySelector('.submit-so').textContent = 'Gudbi Foomka';
+      btn.querySelector('.submit-en').textContent = 'Submit Form';
     }
-  });
-
-  function resetForm() {
-    document.getElementById('intakeForm').reset();
-    document.getElementById('intakeForm').style.display = '';
-    document.getElementById('successScreen').classList.remove('visible');
-    document.querySelectorAll('.other-input').forEach(el => el.classList.remove('visible'));
-    document.getElementById('status').textContent = '';
   }
 </script>
-
 </body>
 </html>
